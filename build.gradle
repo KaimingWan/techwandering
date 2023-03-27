@@ -1,0 +1,244 @@
+// The buildscript block defines dependencies in order for .gradle file evaluation.
+// This is separate from application dependencies.
+// See https://stackoverflow.com/questions/17773817/purpose-of-buildscript-block-in-gradle.
+buildscript {
+    repositories {
+        maven {
+            url "https://maven.aliyun.com/repository/gradle-plugin"
+        }
+    }
+}
+
+plugins {
+    // ref:https://docs.gradle.org/current/userguide/base_plugin.html
+    id 'base'
+    // help do java code check with rules, ref:https://pmd.github.io/latest/
+    id 'pmd'
+    id 'com.diffplug.spotless' version '6.12.0'
+    id 'com.github.spotbugs' version '5.0.13'
+    // The distribution plugin has been added to address the an issue with the copyGeneratedTar
+    // task depending on "distTar". When that dependency has been refactored away, this plugin
+    // can be removed.
+    id 'distribution'
+
+    // support version catalog. Version is defined in deps.toml
+    id 'version-catalog'
+    id 'maven-publish'
+
+    //custom plugins
+    id 'techwandering-gradle-plugin-save-git-info'
+}
+
+
+def createSpotlessTarget = { pattern ->
+    def excludes = ['.gradle',
+                    'node_modules',
+                    'build',
+                    'tools',]
+
+    return fileTree(dir: rootDir, include: pattern, exclude: excludes.collect { "**/${it}" })
+}
+
+
+def createLicenseWith = { File license, String startComment, String endComment, String lineComment ->
+
+    def tmp = File.createTempFile('tmp', '.tmp')
+    tmp.withWriter {
+        def w = it
+        if (startComment.length() > 0) {
+            w.writeLine(startComment)
+        }
+        license.eachLine {
+            w << lineComment
+            w.writeLine(it)
+        }
+        if (endComment.length() > 0) {
+            w.writeLine(endComment)
+        }
+        w.writeLine("")
+    }
+    return tmp
+}
+
+def createJavaLicenseWith = { license -> return createLicenseWith(license, '/*', ' */', ' * ')
+}
+
+
+spotless {
+    java {
+        target createSpotlessTarget('**/*.java')
+
+        importOrder()
+        eclipse('4.21.0').configFile(rootProject.file('tools/gradle/codestyle/java-google-style.xml'))
+        licenseHeaderFile createJavaLicenseWith(rootProject.file('LICENSE_SHORT'))
+        removeUnusedImports()
+        trimTrailingWhitespace()
+    }
+    groovyGradle {
+        target createSpotlessTarget('**/*.gradle')
+    }
+    sql {
+        target createSpotlessTarget('**/*.sql')
+
+        dbeaver().configFile(rootProject.file('tools/gradle/codestyle/sql-dbeaver.properties'))
+    }
+    format 'styling', {
+        target createSpotlessTarget(['**/*.yaml', '**/*.json'])
+
+        prettier()
+    }
+}
+check.dependsOn 'spotlessApply'
+
+repositories {
+    mavenLocal()
+    // ---------- china use mirror of https://developer.aliyun.com/mvn/view -------
+    // central
+    maven { url 'https://maven.aliyun.com/repository/central' }
+    // google
+    maven { url 'https://maven.aliyun.com/repository/google' }
+    // jcenter
+    maven { url 'https://maven.aliyun.com/repository/jcenter' }
+
+}
+
+
+ext {
+    version = '1.0.0-SNAPSHOT'
+}
+allprojects {
+    apply plugin: 'base'
+}
+
+// Java projects common configurations
+subprojects { subproj ->
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'com.github.spotbugs'
+    apply plugin: 'pmd'
+
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    pmd {
+        consoleOutput = true
+        ignoreFailures = false
+        rulesMinimumPriority = 5
+        ruleSets = []
+        ruleSetFiles = files(rootProject.file('tools/gradle/pmd/rules.xml'))
+        toolVersion = '6.51.0'
+    }
+    tasks.withType(Pmd) {
+        exclude '**/generated/**'
+        exclude '**/techwandering/test/**'
+        exclude '**/techwandering/algorithm/**'
+    }
+
+    spotbugs {
+        ignoreFailures = false
+        effort = 'max'
+        excludeFilter = rootProject.file('spotbugs-exclude-filter-file.xml')
+        reportLevel = 'high'
+        showProgress = false
+        toolVersion = '4.7.3'
+    }
+    spotbugsTest.enabled = false
+
+
+    jacoco {
+        toolVersion = "0.8.8"
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            html.required = true
+            xml.required = true
+            csv.required = false
+        }
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            failOnViolation = false
+            rule {
+                element = 'CLASS'
+                excludes = ['**/*Test*', '**/generated*']
+                limit {
+                    counter = 'BRANCH'
+                    minimum = 0.8
+                }
+                limit {
+                    counter = 'INSTRUCTION'
+                    minimum = 0.8
+                }
+            }
+        }
+    }
+
+    test {
+        jacoco {
+            enabled = true
+            excludes = ['**/*Test*', '**/generated*']
+        }
+
+        testLogging() {
+            events "passed", "skipped", "failed"
+            exceptionFormat 'full'
+            // uncomment to get the full log output
+            // showStandardStreams = true
+        }
+        finalizedBy jacocoTestReport
+    }
+
+    task allTests(type: Test) {
+        useJUnitPlatform()
+        testLogging() {
+            events "passed", "failed", "started"
+            exceptionFormat 'full'
+            // uncomment to get the full log output
+            // showStandardStreams = true
+        }
+        finalizedBy jacocoTestReport
+    }
+    check.dependsOn 'jacocoTestCoverageVerification'
+
+
+    dependencies {
+        if (subproj.name != 'techwandering-common') {
+            implementation project(':techwandering-common')
+        }
+
+        ////////////////////////////////////// commons /////////////////////////////////////////////
+        implementation libs.bundles.jackson
+        implementation libs.guava
+        implementation libs.commons.io
+        implementation libs.bundles.apache
+        ////////////////////////////////////// logs ////////////////////////////////////////////////
+        implementation libs.slf4j.api
+        // SLF4J as a facade over Log4j2 required dependencies
+        implementation libs.bundles.log4j
+        // Bridges from other logging implementations to SLF4J
+        implementation libs.bundles.slf4j
+        // Dependencies for logging to cloud storage, as well as the various clients used to do so.
+        implementation libs.appender.log4j2
+        ////////////////////////////////////// lombok annotation ///////////////////////////////////
+        compileOnly libs.lombok
+        testCompileOnly libs.lombok
+        annotationProcessor libs.lombok
+        testAnnotationProcessor libs.lombok
+        ////////////////////////////////////// test ////////////////////////////////////////////////
+        compileOnly libs.jmh.core
+        testCompileOnly libs.jmh.core
+        annotationProcessor libs.jmh.annotation
+        testAnnotationProcessor libs.jmh.annotation
+        testRuntimeOnly libs.junit.jupiter.engine
+        testImplementation libs.bundles.junit
+        testImplementation libs.assertj.core
+        testImplementation libs.junit.pioneer
+        testImplementation libs.junit.pioneer
+
+
+    }
+
+}

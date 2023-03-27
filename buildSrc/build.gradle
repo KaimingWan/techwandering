@@ -1,0 +1,34 @@
+plugins {
+    id 'java-gradle-plugin' // Java Gradle Plugin
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+tasks.withType(Jar) {
+    //create duplicated file or override it
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+}
+
+
+gradlePlugin {
+    plugins {
+        saveGitInfoPlugin {
+            id = 'techwandering-gradle-plugin-save-git-info'
+            implementationClass = 'com.techwandering.gradle.plugins.SaveGitInfoPlugin'
+        }
+    }
+}

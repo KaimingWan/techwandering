@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="io.airbyte.commons.logging" status="INFO">
+  <Appenders>
+    <Console name="Default" target="SYSTEM_OUT">
+      <PatternLayout pattern="${default-pattern}"/>
+    </Console>
+
+    <Console name="SimpleDefault" target="SYSTEM_OUT">
+      <PatternLayout pattern="${simple-pattern}"/>
+    </Console>
+
+    <Rewrite name="SecretMaskRewrite">
+      <!--      reference class MaskedDataInterceptor-->
+      <!--      <MaskedDataInterceptor></MaskedDataInterceptor>-->
+      <AppenderRef ref="Default"/>
+      <AppenderRef ref="SimpleDefault"/>
+      <AppenderRef ref="LogSplit"/>
+      <AppenderRef ref="SimpleLogSplit"/>
+      <AppenderRef ref="AppLogSplit"/>
+    </Rewrite>
+
+    <Routing name="LogSplit">
+      <ContextMapFilter onMatch="DENY" onMismatch="ACCEPT">
+        <KeyValuePair key="simple" value="true"/>
+      </ContextMapFilter>
+      <IdlePurgePolicy timeToLive="15" timeUnit="minutes"/>
+      <Routes pattern="$${ctx:job_log_path}">
+        <!-- Don't split logs if job_root isn't defined -->
+        <Route key="$${ctx:job_log_path}">
+          <Null name="/dev/null"/>
+        </Route>
+        <Route>
+          <File fileName="${ctx:job_log_path}" name="${ctx:job_log_path}-local">
+            <PatternLayout pattern="${default-pattern}"/>
+          </File>
+        </Route>
+      </Routes>
+    </Routing>
+
+    <Routing name="SimpleLogSplit">
+      <ContextMapFilter onMatch="ACCEPT" onMismatch="DENY">
+        <KeyValuePair key="simple" value="true"/>
+      </ContextMapFilter>
+      <IdlePurgePolicy timeToLive="15" timeUnit="minutes"/>
+      <Routes pattern="$${ctx:job_log_path}">
+        <!-- Don't split logs if job_root isn't defined -->
+        <Route key="$${ctx:job_log_path}">
+          <Null name="/dev/null"/>
+        </Route>
+        <Route>
+          <File fileName="${ctx:job_log_path}" name="${ctx:job_log_path}-local">
+            <PatternLayout pattern="${simple-pattern}"/>
+          </File>
+        </Route>
+      </Routes>
+    </Routing>
+
+
+    <Routing name="AppLogSplit">
+      <IdlePurgePolicy timeToLive="15" timeUnit="minutes"/>
+      <Routes pattern="$${ctx:workspace_app_root}">
+        <!-- Don't split logs if workspace_app_log_root isn't defined -->
+        <Route key="$${ctx:workspace_app_root}">
+          <Null name="/dev/null"/>
+        </Route>
+        <Route>
+          application log
+          <RollingFile
+            fileName="${ctx:workspace_app_root}/logs.log"
+            filePattern="${ctx:workspace_app_root}/logs.%i.log.gz"
+            ignoreExceptions="false"
+            name="${ctx:workspace_app_root}-local">
+            <DefaultRolloverStrategy max="3"/>
+            <PatternLayout pattern="${default-pattern}"/>
+            <Policies>
+              <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+          </RollingFile>
+        </Route>
+      </Routes>
+    </Routing>
+
+  </Appenders>
+
+  <Loggers>
+    <Logger level="INFO" name="org.eclipse.jetty"/>
+
+    <!--    you can specify package class use specified log level-->
+    <Logger level="WARN" name="org.apache"/>
+    <Logger level="WARN" name="httpclient"/>
+    <Logger level="WARN" name="com.amazonaws"/>
+    <Logger level="OFF" name="io.debezium.relational.history"/>
+
+    <!--    you can off not useful logs-->
+    <Root level="${log-level}">
+      <!-- Use the rewrite policy to ensure that secrets are masked when logged
+      Any additional appender references should be added to the <Rewrite> section above in this document
+      to ensure that any secrets logged via those appenders is masked.-->
+      <AppenderRef ref="SecretMaskRewrite"/>
+    </Root>
+
+    <!--Uncomment the following to debug JOOQ generated SQL queries.-->
+    <!--<Logger name="org.jooq.tools.LoggerListener" level="debug">-->
+    <!--  <AppenderRef ref="Console"/>-->
+    <!--</Logger>-->
+
+  </Loggers>
+
+  <Properties>
+
+    <!-- Mask the string apikey=<string> to apikey=***** to prevent secrets leaking. -->
+    <Property name="default-pattern">%d{yyyy-MM-dd HH:mm:ss}{GMT+0} %highlight{%p} %C{1.}(%M):%L -
+      %replace{%m}{apikey=[\w\-]*}{apikey=*****}%n
+    </Property>
+    <!--Logs the timestamp and log_source/application name in the beginning of the line if it exists with a > separator, and then always the rest of the line.-->
+    <Property name="simple-pattern">%d{yyyy-MM-dd HH:mm:ss}{GMT+0}%replace{ %X{log_source}}{^ -}{} >
+      %replace{%m}{apikey=[\w\-]*}{apikey=*****}%n
+    </Property>
+
+    <!-- Always log INFO by default. -->
+    <Property name="log-level">${sys:LOG_LEVEL:-${env:LOG_LEVEL:-INFO}}</Property>
+  </Properties>
+
+</Configuration>

@@ -1,0 +1,48 @@
+## reference file in pgjdbc: https://github.com/pgjdbc/pgjdbc/blob/master/.github/workflows/buildcache.yml
+name: Seed build cache
+
+on:
+  push:
+    branches:
+      - '*'
+    paths-ignore:
+      - 'tools/**'
+      - '**/*.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  # Push to the same branch (ref is like refs/heads/release) should stop previous buildcache
+  # workflows for the branch.
+  # More info: https://stackoverflow.com/a/68422069/253468
+  group: ci-buildcache-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  seed-build-cache:
+    strategy:
+      # CI resources are shared, so reduce concurrent builds
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        os: [ ubuntu ]
+        jdk: [ 17 ]
+
+    name: '${{ matrix.os }}, ${{ matrix.jdk }} seed build cache'
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 50
+      - name: 'Set up JDK ${{ matrix.jdk }}'
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.jdk }}
+          distribution: 'zulu'
+      - uses: burrunan/gradle-cache-action@v1
+        name: Build Tech Wandering
+        with:
+          job-id: jdk${{ matrix.jdk }}
+          remote-build-cache-proxy-enabled: false
+          arguments: build -x test --scan
