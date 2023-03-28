@@ -188,7 +188,7 @@
             <version>${jmh.version}</version>
             <scope>test</scope>
         </dependency>
-    
+
     </dependencies>
     
     <build>
@@ -267,7 +267,7 @@
                                 &lt;project
                             </search>
                             <replacement>--&gt;
-                                
+        
                                 &lt;project
                             </replacement>
                         </replace>

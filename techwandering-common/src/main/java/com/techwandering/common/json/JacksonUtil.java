@@ -29,74 +29,73 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  **/
 @Slf4j
 public class JacksonUtil {
-  
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  
-  /**
-   * Convert object to json string.
-   *
-   * @param obj any object.
-   * @return json string
-   */
-  public static String toJsonString(final Object obj) {
-    try {
-      return OBJECT_MAPPER.writeValueAsString(obj);
-    } catch (Exception e) {
-      String msg = "write map to json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-      log.error(msg, e);
-      throw new RuntimeException(msg, e);
+    
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    
+    /**
+     * Convert object to json string.
+     *
+     * @param obj any object.
+     * @return json string
+     */
+    public static String toJsonString(final Object obj) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(obj);
+        } catch (Exception e) {
+            String msg = "write map to json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
+        }
     }
-  }
-  
-  /**
-   * Convert object to pretty json string.
-   *
-   * @param obj any object
-   * @return json string
-   */
-  public static String toJsonPretty(final Object obj) {
-    try {
-      return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
-    } catch (Exception e) {
-      String msg = "write map to json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-      log.error(msg, e);
-      throw new RuntimeException(msg, e);
+    
+    /**
+     * Convert object to pretty json string.
+     *
+     * @param obj any object
+     * @return json string
+     */
+    public static String toJsonPretty(final Object obj) {
+        try {
+            return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        } catch (Exception e) {
+            String msg = "write map to json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
+        }
     }
-  }
-  
-  /**
-   * Parse object from json string.
-   *
-   * @param message json format message.
-   * @param mapClass any class
-   * @param <T> generic type
-   * @return specified generic class
-   */
-  public static <T> T readJson(final String message, Class<T> mapClass) {
-    try {
-      return OBJECT_MAPPER.readerFor(mapClass).readValue(message);
-    } catch (Exception e) {
-      String msg = "read from json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-      log.error(msg, e);
-      throw new RuntimeException(msg, e);
+    
+    /**
+     * Parse object from json string.
+     *
+     * @param message json format message.
+     * @param mapClass any class
+     * @param <T> generic type
+     * @return specified generic class
+     */
+    public static <T> T readJson(final String message, Class<T> mapClass) {
+        try {
+            return OBJECT_MAPPER.readerFor(mapClass).readValue(message);
+        } catch (Exception e) {
+            String msg = "read from json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
+        }
     }
-  }
-  
-  /**
-   * Get json node from json string.
-   *
-   * @param message
-   * @return
-   */
-  public static JsonNode getJsonNode(String message) {
-    try {
-      return OBJECT_MAPPER.readTree(message);
-    } catch (Exception e) {
-      String msg =
-              "read json node from json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-      log.error(msg, e);
-      throw new RuntimeException(msg, e);
+    
+    /**
+     * Get json node from json string.
+     *
+     * @param message
+     * @return
+     */
+    public static JsonNode getJsonNode(String message) {
+        try {
+            return OBJECT_MAPPER.readTree(message);
+        } catch (Exception e) {
+            String msg = "read json node from json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
+        }
     }
-  }
-  
+    
 }
