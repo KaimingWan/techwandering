@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="io.airbyte.commons.logging" status="INFO">
+<Configuration status="INFO">
+  <Properties>
+    <!-- Mask the string apikey=<string> to apikey=***** to prevent secrets leaking. -->
+    <Property name="default-pattern">%d{yyyy-MM-dd HH:mm:ss}{GMT+0} %highlight{%p} %C{1.}(%M):%L -
+      %replace{%m}{apikey=[\w\-]*}{apikey=*****}%n
+    </Property>
+    <!--Logs the timestamp and log_source/application name in the beginning of the line if it exists with a > separator, and then always the rest of the line.-->
+    <Property name="simple-pattern">%d{yyyy-MM-dd HH:mm:ss}{GMT+0}%replace{ %X{log_source}}{^ -}{} >
+      %replace{%m}{apikey=[\w\-]*}{apikey=*****}%n
+    </Property>
+    <!-- Always log INFO by default. -->
+    <Property name="log-level">${sys:LOG_LEVEL:-${env:LOG_LEVEL:-INFO}}</Property>
+  </Properties>
+  
   <Appenders>
     <Console name="Default" target="SYSTEM_OUT">
       <PatternLayout pattern="${default-pattern}"/>
     </Console>
-
+    
     <Console name="SimpleDefault" target="SYSTEM_OUT">
       <PatternLayout pattern="${simple-pattern}"/>
     </Console>
-
+    
     <Rewrite name="SecretMaskRewrite">
       <!--      reference class MaskedDataInterceptor-->
       <!--      <MaskedDataInterceptor></MaskedDataInterceptor>-->
@@ -106,19 +119,6 @@
 
   </Loggers>
 
-  <Properties>
 
-    <!-- Mask the string apikey=<string> to apikey=***** to prevent secrets leaking. -->
-    <Property name="default-pattern">%d{yyyy-MM-dd HH:mm:ss}{GMT+0} %highlight{%p} %C{1.}(%M):%L -
-      %replace{%m}{apikey=[\w\-]*}{apikey=*****}%n
-    </Property>
-    <!--Logs the timestamp and log_source/application name in the beginning of the line if it exists with a > separator, and then always the rest of the line.-->
-    <Property name="simple-pattern">%d{yyyy-MM-dd HH:mm:ss}{GMT+0}%replace{ %X{log_source}}{^ -}{} >
-      %replace{%m}{apikey=[\w\-]*}{apikey=*****}%n
-    </Property>
-
-    <!-- Always log INFO by default. -->
-    <Property name="log-level">${sys:LOG_LEVEL:-${env:LOG_LEVEL:-INFO}}</Property>
-  </Properties>
 
 </Configuration>

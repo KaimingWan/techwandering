@@ -1,9 +1,10 @@
 /*
- * Copyright 2023 TechWandering
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -16,9 +17,10 @@
 
 package com.techwandering.algorithm.leetcode.sort;
 
+import org.junit.jupiter.api.Assertions;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.Assertions;
 
 /**
  * <pre>
@@ -29,27 +31,27 @@ import org.junit.jupiter.api.Assertions;
  * @author wanshao create time is 2023/2/22
  **/
 public class LC179 {
-
-  /**
-   * <pre>
-   *   try string join and compare. 3,30 will compare 330 and 303, use the larger one
-   * </pre>
-   */
-
-  public static void main(String[] args) {
-    int[] nums = {3, 30, 34, 5, 9};
-    Assertions.assertEquals("9534330", new Solution().largestNumber(nums));
-  }
-
-  static class Solution {
-
-    public String largestNumber(int[] nums) {
-      return Arrays.stream(Arrays.stream(nums).boxed().toArray()).map(String::valueOf)
-          .sorted((x, y) -> (y + x).compareTo(x + y)).collect(
-              Collectors.collectingAndThen(Collectors.joining(""),
-                  s -> s.charAt(0) == '0' ? "0" : s));
+    
+    /**
+     * <pre>
+     *   try string join and compare. 3,30 will compare 330 and 303, use the larger one
+     * </pre>
+     */
+    
+    public static void main(String[] args) {
+        int[] nums = {3, 30, 34, 5, 9};
+        Assertions.assertEquals("9534330", new Solution().largestNumber(nums));
     }
-
-  }
-
+    
+    static class Solution {
+        
+        public String largestNumber(int[] nums) {
+            return Arrays.stream(Arrays.stream(nums).boxed().toArray()).map(String::valueOf)
+                    .sorted((x, y) -> (y + x).compareTo(x + y)).collect(
+                            Collectors.collectingAndThen(Collectors.joining(""),
+                                    s -> s.charAt(0) == '0' ? "0" : s));
+        }
+        
+    }
+    
 }
