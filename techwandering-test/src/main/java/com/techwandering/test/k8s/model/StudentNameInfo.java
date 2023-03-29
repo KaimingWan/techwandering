@@ -15,18 +15,25 @@
  * limitations under the License.
  */
 
-package com.techwandering.test;
+package com.techwandering.test.k8s.model;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
 
 /**
  * @author wanshao
  * create time is  2023/3/28
  **/
-@Slf4j
-public class MainApp {
+@Getter
+public class StudentNameInfo {
     
-    public static void main(String[] args) {
-        log.info("!!!!!!!!!!");
+    private final long id;
+    private final String firstName;
+    
+    private final String lastName;
+    
+    public StudentNameInfo(final long id, final String firstName, final String lastName) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 }

@@ -15,26 +15,22 @@
  * limitations under the License.
  */
 
-package com.techwandering.common;
+package com.techwandering.test.k8s;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Basic hello test.
- *
- * @author wanshao create time is 2023/2/15
+ * @author wanshao
+ * create time is  2023/3/28
  **/
-class HelloTest {
+@Slf4j
+@SpringBootApplication
+public class MainApp {
     
-    /**
-     * It is a main test.
-     */
-    @Test
-    void main() {
-        String classpath = System.getProperty("java.class.path");
-        System.out.println(classpath);
-        Assertions.assertThat("hello").isEqualTo("hello");
+    public static void main(String[] args) {
+        log.info("Run this app in k8s !!!");
+        SpringApplication.run(MainApp.class, args);
     }
-    
 }

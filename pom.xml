@@ -18,6 +18,10 @@
     </modules>
     
     <properties>
+        <!--    project related properties-->
+        <revision>1.0.0-SNAPSHOT</revision>
+        <!--        web related-->
+        <springboot.version>3.0.5</springboot.version>
         <!--   dependency version-->
         <fasterxml.version>2.14.2</fasterxml.version>
         <junit.jupiter.version>5.9.2</junit.jupiter.version>
@@ -27,9 +31,6 @@
         <jmh.version>1.36</jmh.version>
         <!-- Plugin versions -->
         <pmd.version>3.20.0</pmd.version>
-        
-        <!--    project related properties-->
-        <revision>1.0.0</revision>
         <!--    build properties-->
         <java.version>1.8</java.version>
         <maven.version.range>[3.0.4,)</maven.version.range>
@@ -45,14 +46,39 @@
                 <artifactId>techwandering-common</artifactId>
                 <version>${revision}</version>
             </dependency>
-            
-            <!-- web related -->
-            
+        
+            <!-- spring web related -->
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        
             <!-- database related -->
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikaricp.version}</version>
+            </dependency>
+        
+            <!-- log related -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -107,23 +133,6 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>${fasterxml.version}</version>
-        </dependency>
-        
-        <!-- log related -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
         </dependency>
         
         <dependency>
@@ -192,6 +201,16 @@
     </dependencies>
     
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${springboot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        
         <plugins>
             <!--            java compile-->
             <plugin>
@@ -213,7 +232,7 @@
                     <targetJdk>${java.version}</targetJdk>
                     <minimumTokens>50</minimumTokens>
                     <rulesets>
-                        <ruleset>resource/checkstyle/pmd-rules.xml</ruleset>
+                        <ruleset>${maven.multiModuleProjectDirectory}/resource/checkstyle/pmd-rules.xml</ruleset>
                     </rulesets>
                     <printFailingErrors>true</printFailingErrors>
                     <aggregate>true</aggregate>
@@ -298,6 +317,32 @@
                             <goal>check</goal>
                         </goals>
                         <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--            support maven revision -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <phase>clean</phase>
                     </execution>
                 </executions>
             </plugin>

@@ -12,5 +12,9 @@
     <groupId>com.techwandering</groupId>
     <artifactId>techwandering-common</artifactId>
     <packaging>jar</packaging>
+    
+    <dependencies>
+    
+    </dependencies>
 
 </project>

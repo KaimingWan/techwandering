@@ -19,7 +19,6 @@ package com.techwandering.common.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
@@ -27,7 +26,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  *
  * @author wanshao create time is 2021/4/13
  **/
-@Slf4j
 public class JacksonUtil {
     
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -43,7 +41,6 @@ public class JacksonUtil {
             return OBJECT_MAPPER.writeValueAsString(obj);
         } catch (Exception e) {
             String msg = "write map to json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-            log.error(msg, e);
             throw new RuntimeException(msg, e);
         }
     }
@@ -59,7 +56,6 @@ public class JacksonUtil {
             return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
         } catch (Exception e) {
             String msg = "write map to json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-            log.error(msg, e);
             throw new RuntimeException(msg, e);
         }
     }
@@ -77,7 +73,6 @@ public class JacksonUtil {
             return OBJECT_MAPPER.readerFor(mapClass).readValue(message);
         } catch (Exception e) {
             String msg = "read from json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-            log.error(msg, e);
             throw new RuntimeException(msg, e);
         }
     }
@@ -93,7 +88,6 @@ public class JacksonUtil {
             return OBJECT_MAPPER.readTree(message);
         } catch (Exception e) {
             String msg = "read json node from json string error.msg:" + ExceptionUtils.getRootCauseMessage(e);
-            log.error(msg, e);
             throw new RuntimeException(msg, e);
         }
     }

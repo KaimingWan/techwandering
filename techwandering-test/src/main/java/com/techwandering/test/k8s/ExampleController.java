@@ -15,26 +15,20 @@
  * limitations under the License.
  */
 
-package com.techwandering.common;
+package com.techwandering.test.k8s;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Basic hello test.
- *
- * @author wanshao create time is 2023/2/15
+ * @author wanshao
+ * create time is  2023/3/28
  **/
-class HelloTest {
+@RestController
+public class ExampleController {
     
-    /**
-     * It is a main test.
-     */
-    @Test
-    void main() {
-        String classpath = System.getProperty("java.class.path");
-        System.out.println(classpath);
-        Assertions.assertThat("hello").isEqualTo("hello");
+    @RequestMapping("/")
+    public String helloWorld() {
+        return "Hello from Spring Boot..";
     }
-    
 }

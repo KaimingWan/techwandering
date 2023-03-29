@@ -40,4 +40,5 @@ hs_err_pid*
 
 target/
 
-target/
+# ignore maven 3.5 flattern pom
+.flattened-pom.xml
