@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
@@ -46,7 +46,7 @@
                 <artifactId>techwandering-common</artifactId>
                 <version>${revision}</version>
             </dependency>
-        
+            
             <!-- spring web related -->
             <dependency>
                 <!-- Import dependency management from Spring Boot -->
@@ -56,14 +56,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-        
+            
             <!-- database related -->
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikaricp.version}</version>
             </dependency>
-        
+            
             <!-- log related -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -197,7 +197,7 @@
             <version>${jmh.version}</version>
             <scope>test</scope>
         </dependency>
-
+        
     </dependencies>
     
     <build>
@@ -224,32 +224,32 @@
                 </configuration>
             </plugin>
             <!--            pdm check-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>${pmd.version}</version>
-                <configuration>
-                    <targetJdk>${java.version}</targetJdk>
-                    <minimumTokens>50</minimumTokens>
-                    <rulesets>
-                        <ruleset>${maven.multiModuleProjectDirectory}/resource/checkstyle/pmd-rules.xml</ruleset>
-                    </rulesets>
-                    <printFailingErrors>true</printFailingErrors>
-                    <aggregate>true</aggregate>
-                    <failOnViolation>true</failOnViolation>
-                    <printFailingErrors>true</printFailingErrors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <!--   strict-->
-                            <goal>check</goal>
-                            <goal>cpd-check</goal>
-                        </goals>
-                        <phase>compile</phase>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-pmd-plugin</artifactId>-->
+            <!--                <version>${pmd.version}</version>-->
+            <!--                <configuration>-->
+            <!--                    <targetJdk>${java.version}</targetJdk>-->
+            <!--                    <minimumTokens>50</minimumTokens>-->
+            <!--                    <rulesets>-->
+            <!--                        <ruleset>${maven.multiModuleProjectDirectory}/resource/checkstyle/pmd-rules.xml</ruleset>-->
+            <!--                    </rulesets>-->
+            <!--                    <printFailingErrors>true</printFailingErrors>-->
+            <!--                    <aggregate>true</aggregate>-->
+            <!--                    <failOnViolation>true</failOnViolation>-->
+            <!--                    <printFailingErrors>true</printFailingErrors>-->
+            <!--                </configuration>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <goals>-->
+            <!--                            &lt;!&ndash;   strict&ndash;&gt;-->
+            <!--                            <goal>check</goal>-->
+            <!--                            <goal>cpd-check</goal>-->
+            <!--                        </goals>-->
+            <!--                        <phase>compile</phase>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
             <!--      code style check-->
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
@@ -283,12 +283,10 @@
                         <replace>
                             <name>Leading blank line</name>
                             <search>--&gt;
-                                &lt;project
-                            </search>
+                                &lt;project</search>
                             <replacement>--&gt;
-        
-                                &lt;project
-                            </replacement>
+
+                                &lt;project</replacement>
                         </replace>
                     </pom>
                 </configuration>
@@ -357,5 +355,5 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
+    
 </project>

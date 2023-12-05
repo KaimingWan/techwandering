@@ -17,13 +17,15 @@
 
 package com.techwandering.test.k8s.model;
 
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 
 /**
  * @author wanshao
  * create time is  2023/3/28
  **/
-@Getter
+@Builder
+@Data
 public class StudentNameInfo {
     
     private final long id;
