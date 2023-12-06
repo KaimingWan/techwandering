@@ -15,6 +15,7 @@
         <module>techwandering-common</module>
         <module>techwandering-test</module>
         <module>techwandering-algorithm</module>
+        <module>techwandering-cloud</module>
     </modules>
     
     <properties>
