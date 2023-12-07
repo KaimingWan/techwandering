@@ -47,7 +47,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.techwandering.cloud.aws.example.s3.ListObjects</mainClass>
+                            <mainClass>com.techwandering.cloud.aws.example.s3.UploadObjects</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

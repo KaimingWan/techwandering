@@ -42,13 +42,19 @@ package com.techwandering.cloud.aws.example.s3;
    specific language governing permissions and limitations under the License.
 */
 
+import lombok.SneakyThrows;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * List objects within an Amazon S3 bucket.
@@ -56,19 +62,62 @@ import java.net.URI;
  * This code expects that you have AWS credentials set up per:
  * http://docs.aws.amazon.com/java-sdk/latest/developer-guide/setup-credentials.html
  */
-public class ListObjects {
+public class UploadObjects {
 
+    @SneakyThrows
     public static void main(String[] args) {
+        URI endpointUri = new URI("https", "automq-ko3.oss-cn-hangzhou.aliyuncs.com", null, null);
+
         S3Client s3 = S3Client.builder()
-                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("xxx", "xxx")))
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("x", "x")))
                 .region(Region.AWS_GLOBAL)
-                .endpointOverride(URI.create("https://s3.oss-cn-hangzhou.aliyuncs.com"))
+                .endpointOverride(endpointUri)
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(false)
                         .chunkedEncodingEnabled(false)
                         .build())
                 .build();
 
-        s3.listBuckets().buckets().forEach(System.out::println);
+        // 生成一个文本文件 a.txt，里面字符串为 "abc"
+        Path filePath = Paths.get("a.txt");
+        Files.write(filePath, "abc".getBytes());
+
+        String bucketName = "automq-ko3";
+        String key = "a.txt";
+
+        // 初始化 multipart 上传
+        CreateMultipartUploadRequest multipartUploadRequest = CreateMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        CreateMultipartUploadResponse response = s3.createMultipartUpload(multipartUploadRequest);
+        String uploadId = response.uploadId();
+
+        // 上传文件的部分
+        UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .partNumber(1)
+                .build();
+        UploadPartResponse uploadPartResponse = s3.uploadPart(uploadPartRequest, RequestBody.fromFile(filePath));
+
+        // 完成 multipart 上传
+        CompletedPart part = CompletedPart.builder()
+                .partNumber(1)
+                .eTag(uploadPartResponse.eTag())
+                .build();
+        CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
+                .parts(part)
+                .build();
+        CompleteMultipartUploadRequest completeMultipartUploadRequest = CompleteMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .multipartUpload(completedMultipartUpload)
+                .build();
+        s3.completeMultipartUpload(completeMultipartUploadRequest);
+
+        System.out.println("File uploaded: " + key);
     }
 }
